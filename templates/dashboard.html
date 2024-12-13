@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Page</title>
+</head>
+<body>
+    <!--Welcome message-->
+    <h1>Dashboard</h1>
+    <h2>Welcome, {{ name }} </h2>
+
+    <!--Flash Messages-->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+           </ul>
+        {% endif %}
+    {% endwith %}
+    
+    <!--Display User Data-->
+    <section>
+        <p><strong>In/Clock Out Times</strong></p>
+        <ul>
+            {% for clock_in, clock_out in clock_in_times %}
+            <li>Clock In: {{ clock_in }}, Clock Out: {{ clock_out if clock_out else "Not yet clocked out" }}</li>
+            {% endfor %}
+        </ul>
+        <p><strong>Earnings:</strong> ${{ earnings }} </p>
+    </section>
+
+    <section>
+        <h3>Actions</h3>
+
+         <!-- Clock In Form-->
+          <form method="POST" action="{{ url_for('clock_in') }}">
+            <button type="submit">Clock In</button>
+          </form>
+         
+        <!--Clock Out Form-->
+           <form method="POST" action="{{ url_for('clock_out') }}">
+            <button type="submit">Clock Out</button>
+        </form>
+
+        <!--Calculate Earnings Form-->
+           <form method="POST" action="{{ url_for('calculate_earnings_route') }}">
+            <button type="submit">Calculate Earnings</button>
+        </form>
+
+    <!-- Delete Account -->
+     <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirmDelete();">
+        <button type="submit" style="background-color: red; color: white;">Delete Account</button>
+    </form>
+    </section>
+
+    <!-- JavaScript for Confirmation -->
+     <script>
+        function confirmDelete(){
+            return confirm("Are you sure you want to delete your account. This action cannot be undone.")
+    
+        }
+     </script>
+
+</body>
+</html>

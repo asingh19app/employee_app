@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <!-- Inform the user about location permissions-->
+     <p>To log in, we need to verify that you're within the allowed area near Mercy University's Dobbs Ferry Campus
+        Please allow location when prompted.
+     </p>
+
+     <!-- Flash messages -->
+      {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+      {% endwith %}
+    <!-- Login Form-->
+     <form method="POST" action=" {{ url_for('login') }}" id="login-form">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" autocomplete="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+        <button type="submit">Login</button>
+     </form>
+
+    <!-- JavaScript to capture user location-->
+    <script>
+        // Ensure browser supports Geolocation
+        if (navigator.geolocation) {
+            console.log("Geolocation is supported.");
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Populate hidden fields with coordinates
+                    console.log("Location retrieved:", position.coords);
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                },
+                (error) => {
+                    console.error("Error occurred while retrieving location:", error);
+                    alert("Unable to retrieve your location. Please enable location services or allow access.");
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser. Please use a appropriate browser.");
+        }
+    </script>
+    
+</body>
+</html>
