@@ -7,6 +7,7 @@ import uuid
 from math import radians,sin,cos,sqrt,atan2
 from datetime import datetime, timedelta
 from html import escape
+import hashlib
 
 # Load environment variables from .env
 load_dotenv()
@@ -85,8 +86,8 @@ def create_account():
         dob = escape(request.form['dob'])
         employee_id = f"E{uuid.uuid4().hex[:8]}"
         
-        # # Hash the password with hashlib
-        # hashed_password = hashlib.sha256(raw_password.encode()).hexdigest()
+        # Hash the password with hashlib
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         #Ensure employee_data.csv exists with headers
         if not os.path.exists('employee_data.csv'):
@@ -97,7 +98,7 @@ def create_account():
         #Append the new employee data to employee_data.csv
         with open('employee_data.csv', 'a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=['name', 'email', 'password', 'dob', 'employee_id'])
-            writer.writerow({'name': name, 'email': email, 'password': password, 'dob': dob, 'employee_id': employee_id})
+            writer.writerow({'name': name, 'email': email, 'password': hashed_password, 'dob': dob, 'employee_id': employee_id})
         
         #Ensure the 'data/' directory exists for individual files
         if not os.path.exists('data'):
@@ -121,6 +122,9 @@ def login():
         email = escape(request.form['email'])
         password = request.form['password']
 
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+
         #Capture user's latitude and longitude from form
         try:
             user_lat = float(request.form['latitude']) #add hidden input
@@ -138,44 +142,32 @@ def login():
             return(redirect(url_for("login")))
         
         #check if email exists and verify password
+
+
         with open('employee_data.csv', 'r') as file:
             reader = csv.DictReader(file)
-            found_email = False #flag to track if email is found
-            found_password = False #flag to track if password is found
-            for row in reader:
-                if email == row['email'] and password == row['password']:
-                    found_email = True #email exists in CSV
-                    found_password = True
-                    session.clear() #clear any previous session data
-                    session['employee_id'] = row['employee_id']
-                    session['name'] = row['name']
-                    flash('Login successful!')
-                    return redirect(url_for('dashboard'))
+            found_email = False  # Flag to track if email is found
             
+            for row in reader:
+                if email == row['email']:
+                    found_email = True  # Email exists in CSV
+                    if hashed_password == row['password']:
+                        session.clear()  # Clear any previous session data
+                        session['employee_id'] = row['employee_id']
+                        session['name'] = row['name']
+                        flash('Login successful!')
+                        return redirect(url_for('dashboard'))
+                    else:
+                         # Email exists but password is incorrect
+                           flash("Invalid password.")
+                           return redirect(url_for('login'))
+            
+            if not found_email:
+                flash("Invalid email.")
+                return redirect(url_for('login'))
 
-                    # found_email = True #email exists in CSV
-                    # if password == row['password']:
-                    #     found_password = True
-                    #     session.clear() #clear any previous session data
-                    #     session['employee_id'] = row['employee_id']
-                    #     session['name'] = row['name']
-                    #     flash('Login successful!')
-                    #     return redirect(url_for('dashboard'))
+       
 
-                elif found_email == True and found_password:
-                    flash("Invalid password")
-
-                elif found_email:
-                    flash("Invalid email")            
-            # if found_password:
-            #     flash("Invalid password")
-            #     return redirect(url_for('login'))
-  
-            # if not found_email:
-            #     flash("Invalid email.") #email not in file
-            #     return redirect(url_for('login'))
-
-        
     #If GET request, render login form
     return render_template('login.html')
 
@@ -362,6 +354,13 @@ def delete_account():
     session.clear()
     flash("Account deleted sucessfully!")
     return redirect(url_for('home'))
+
+#Logout Route
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.clear()  # Clear all session data
+    flash("You have been logged out.")
+    return redirect(url_for('home'))  # Redirect to the home or login page
 
 if __name__ == '__main__':
     app.run(debug=True)

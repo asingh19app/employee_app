@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='/styles.css') }}">
 </head>
 <body>
     <!--Welcome message-->
@@ -50,9 +51,10 @@
             <button type="submit">Calculate Earnings</button>
         </form>
 
+        
     <!-- Delete Account -->
      <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirmDelete();">
-        <button type="submit" style="background-color: red; color: white;">Delete Account</button>
+        <button type="submit">Delete Account</button>
     </form>
     </section>
 
@@ -63,6 +65,13 @@
     
         }
      </script>
+
+    <footer>
+        <form method="GET" action="{{ url_for('logout') }}">
+        <button type="submit">Logout</button>
+        </form> 
+    </footer>
+
 
 </body>
 </html>
