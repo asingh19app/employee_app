@@ -24,7 +24,7 @@ employee_hourly_wage = 22
 #WORK LOCATION COORDINATES AND RADIUS ALLOWED
 MERCY_UNIV_LAT =  41.0165728
 MERCY_UNIV_LON =  -73.8610076
-ALLOWED_RADIUS_KM = 12
+ALLOWED_RADIUS_KM = 2
 
 #req to meet vacation hours
 # vacation_hours_required = .02
@@ -299,7 +299,7 @@ def clock_in():
 @app.route('/clock_out', methods=['POST'])
 def clock_out():
     if 'employee_id' not in session:
-        return jsonify({"error":"Unautorized"}), 401
+        return jsonify({"error":"Unauthorized"}), 401
     
     current_time = datetime.now()
     formatted_time  = current_time.strftime('%Y-%m-%d %H:%M:%S')
